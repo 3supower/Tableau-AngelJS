@@ -96,10 +96,6 @@ while True:
         new_df_filtered["id"] = new_df_filtered['casenumber']
         # print(new_df_filtered.columns)
 
-        # SAMPLE DATAFRAME
-        # new_df_filtered = pd.DataFrame({'CaseNumber': [1111, 2222, 4444], 'Case_Age__c': [1,3,1], 'Status': ['Active', 'Active','Active']})
-        # old_df = pd.DataFrame({'CaseNumber': [1111, 2222, 3333], 'Case_Age__c': [2,2,1], 'Status': ['Active', 'Active', 'Active']})
-
         if old_df.empty:
             print('OLD DataFrame is empty!')
         else:
@@ -127,6 +123,7 @@ while True:
             # print(compare.sample_mismatch('first_response_complete__c'))
             # print(compare.sample_mismatch('product__c'))
             # print(compare.sample_mismatch('case_owner_name__c'))
+
             print("==========================================================================================")
             print("New Case Only - To add in the table")
             if compare.df1_unq_rows.empty:
@@ -177,8 +174,6 @@ while True:
 
                 print(r.table('table1').get(dictRow['id']).update(dictRow).run(conn))
 
-
-
         old_df = new_df_filtered
         old_dict = new_dict
 
@@ -191,18 +186,8 @@ while True:
         # When the program is firstly loaded
         if initial_loading:
             r.table('table1').delete().run(conn)
-            # time.sleep(10)
             r.table('table1').insert(conversion).run(conn)
-            # print(r.table('table1').filter({'casenumber': '07710311'}).run(conn))
-            # print(r.table('table1').get('07313839').run(conn))
-
 
         # conn.close()
-        # print('Inserted records to DB... Sleep 10s')
-        # time.sleep(10)
-        
-        # print('Deleted all document... Sleep 5s')
-        # time.sleep(5)
-    # Sleep for 2 sec before requery
     initial_loading = False
     print('----------------------------------------------------------------------')

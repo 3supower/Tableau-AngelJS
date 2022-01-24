@@ -28,7 +28,9 @@ app.use(function(req, res, next) {
   next();
 });
 
+// This is Server Socket!
 io.on("connection", function(socket){
+  // Server console.log is output to terminal window.
   console.log("A User CONNECTted");
   // socket.emit('news', { hello: 'world' });
   // socket.username = 'jchoiii';
@@ -47,7 +49,6 @@ io.on("connection", function(socket){
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-// app.set('io', io);
 
 app.use(logger('dev'));
 app.use(express.json());
