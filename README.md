@@ -1,9 +1,9 @@
-# Tableau-AngelJS
+# AngelJS
 
-# Tableau Technical Support Dashboard Queue Management Central
+## Purpose:
+Tableau Technical Support Desk Job Queue Dashboard & Management
 
-
-# Technology Used:
+## Technology Used:
 * nodejs
 * npm
 * expressjs
