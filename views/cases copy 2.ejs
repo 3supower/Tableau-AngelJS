@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+      body {
+          padding-top: 50px;
+      }
+    </style>
+  </head>
+  <body class="bg-info">
+    <h1><%= title %></h1>
+    <p id="messages"></p>
+    <!-- 
+    <div class="container">
+      <div class="jumbotron"></div>
+    </div>
+  -->
+    <div class="container">
+        <div class="ZipDatatable">
+            <table id="ZipcodesTable" class="table table-bordered table-sm">
+                <tr>
+                    <th>Case #</th>
+                    <th>Priority</th>
+                    <th>Product</th>
+                    <th>Teir</th>
+                    <th>Subject</th>
+                    <th>Acc</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+  </body>
+  <% 
+    console.log('I am ejs script block---');
+    // console.log(userData);
+  %>
+  <script>
+    var socket = io();
+    var dataSet = <%- JSON.stringify(userData) %>;
+
+    socket.on('onloading', (data) => {
+      console.log(data);
+    });
+    
+    socket.on('newchange', function (data) {
+      // console.log(data);
+      var messages = document.querySelector('#messages');
+      var message = '<b>' + JSON.stringify(data) + '</b>';
+      messages.innerHTML = message;
+
+      $('#ZipcodesTable').DataTable().destroy();
+      
+    });
+
+    socket.on('userData', (data) => {
+      // console.log(data);
+      dataSet = JSON.stringify(data);
+      $('#ZipcodesTable').DataTable().destroy();
+      // $('#ZipcodesTable').DataTable().ajax.reload();
+    });
+
+    console.log('<%= title %>');
+    // var dataSet = <%- JSON.stringify(userData) %>;
+
+    $(document).ready(function () {
+       $('#ZipcodesTable').DataTable({
+            "paging": true,
+            "pageLength": 10,
+            // "processing": true,
+            // "serverSide": true,
+            /* "ajax": {
+                "data":"json",
+                "type": "POST",
+                "url": "/doggy"
+            },*/
+            "data": dataSet,
+            "columns":
+                [
+                    { "data": "CaseNumber" },
+                    { "data": "Priority"},
+                    { "data": "Product__c" },
+                    { "data": "Entitlement_Type__c" },
+                    { "data": "Subject" },
+                    { "data": "Account.Name" }
+                ]
+            
+        });
+    });
+  </script>
+</html>
+
+
+
+

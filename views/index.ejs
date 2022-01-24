@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+
+      console.log('hi i am client!');
+      
+      socket.on('socketToMe', function (data) {
+        console.log(data);
+      });
+
+      socket.on('fromRouter', function (data) {
+        console.log(data); // gogogo
+        $('#fromRouter').val(data);
+      });
+      
+      var person = prompt("Please enter your name", "Harry Potter");
+
+      function sendFunction() {
+        // console.log($('#new-message').val());
+        socket.emit('new message', person + ": " + $('#new-message').val());
+        $('#new-message').val('');
+      }
+
+      socket.on('chat message', function(msg){
+        $('#messages-area').append($('<li>').text(msg));
+      });
+
+      // Not working
+      socket.on('datetime', function (data) {
+        $("#clock").text(new Date(data));
+      });
+
+    </script>
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <p>Welcome to <%= title %></p>
+    <h2>Release: <%= yoyoyo %> </h2>
+    <h3>Server Time: <%= s_time %> </h3> <div><p id="clock"></p></div>
+    
+    <ul id="messages-area"></ul>
+    <form id="form" onsubmit="return false;">
+      <p id="name"></p>
+      <input id="new-message" type="text" /><button onclick="sendFunction()">Send</button>
+    </form>
+    <script>
+      if (person != null) {
+        document.getElementById("name").innerHTML = person;
+      }
+    </script>
+    <p id="fromRouter"></p>
+
+  </body>
+</html>
