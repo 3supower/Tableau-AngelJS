@@ -7,7 +7,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
-    <!-- Client socket -->
     <script src="/socket.io/socket.io.js"></script>
     <style>
       body {
@@ -37,6 +36,11 @@
 
       socket.on('routerEmit', (data) => {
         console.log(data)
+      });
+
+      socket.on('datetime', function (data) {
+        console.log(data);
+        $("#clock").text(new Date(data));
       });
       
       socket.on('newchange', function (data) {
@@ -152,6 +156,7 @@
   <body class="bg-info">
     
     <h3>Change List</h3>
+    <div id="clock"></div>
     <div id="message_box">
       <p id="messages"></p>
     </div>

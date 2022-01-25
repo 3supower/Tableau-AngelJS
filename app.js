@@ -44,6 +44,8 @@ io.on("connection", function(socket){
   });
   
   io.emit('socketToMe', 'from app.js'); // Server to Client directly pass data
+  
+  socket.emit('datetime', new Date().getTime() );
 });
 
 // view engine setup
