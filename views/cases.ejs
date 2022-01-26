@@ -1,242 +1,91 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <style>
-      body {
-          padding-top: 50px;
-      }
-      #message_box {
-        display: block;
-        height: 100 px;
-        background-color: #c2f542;
-        /* overflow: scroll; */
-        border-style: solid;
-        border-color: darkgreen;
-      }
-      #messages {
-        white-space: pre;
-      }
-    </style>
-    <script>
-      // Client socket - soket name is socket (서버 소켓 이름하고 헷깔리지 말것!)
-      // on: input from server
-      // emit: output to server
-      var socket = io();
-
-      socket.on('onloading', (data) => {
-        console.log(data);
-      });
-
-      socket.on('routerEmit', (data) => {
-        console.log(data)
-      });
-
-      socket.on('datetime', function (data) {
-        console.log(data);
-        $("#clock").text(new Date(data));
-      });
-      
-      socket.on('newchange', function (data) {
+    <head>
+        <title><%= title %></title>
+        <link rel='stylesheet' href='/stylesheets/style.css' />
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
         
-        // Test for showing new message - new_val & old_val
-        var messages = document.querySelector('#messages');
-        var new_data = JSON.stringify(data, null, 3);
-        var message = '<b>' + new_data + '</b>';
-        messages.innerHTML = message;
+        
+        <script>
+            var socket = io();
+
+            socket.on('socketToMe', (data) => {
+                console.log(data);
+            });
+
+            socket.on('news', (data) => {
+                console.log(data);
+            });
+
+            socket.on('router_emit1', (data) => {
+                console.log(data);
+            });
+
+            socket.on('datetime', function (data) {
+                console.log(data);
+                $("#clock").text(new Date(data));
+            });
+            
+            socket.on('newchange', function (data) {
+                var messages = document.querySelector('#messages');
+                var new_data = JSON.stringify(data, null, 3);
+                var message = '<b>' + new_data + '</b>';
+                messages.innerHTML = message;
+            });
+
+            socket.on('router_emit2', (data) => {
+                console.log(data)
+            });
+        </script>
+    </head>
+
+    <body class="bg-info">
+
         
 
-        /*
-        // Another Test to insert values in the existing DataTable
-        var parsed = JSON.stringify(data['new_val'], null, 2);
-        var rows = document.querySelector("#ZipcodesTable").rows[parseInt(1,10)].cells;
-        rows[parseInt(1,10)].innerHTML = parsed;
-        */
-        
-        /*
-        // Not compatible with DataTable Frame work...
-        //// var json_data = JSON.parse(new_data)
-        var table = document.querySelector("#ZipcodesTable");
-
-        if(data['new_val'] != null) {
-          var existing_row = document.getElementById(data['new_val']['id'])
-
-          if (existing_row) {
-
-            var children = existing_row.childNodes;
-            children[0].innerHTML = data['new_val']['case_owner_name__c'];
-
-            var origcolor = "";
-            var origopac = "";
-            children[1].style.backgroundColor = origcolor;
-            children[1].style.opacity = origopac;
-            // console.log(origcolor);
-            children[1].style.backgroundColor = 'yellow';
-            var t = setTimeout(function(){
-              children[1].style.backgroundColor = origcolor;
-            },(1*1000));
-
-            children[2].innerHTML = data['new_val']['isescalated'];
-            children[3].innerHTML = data['new_val']['priority'];
-            children[4].innerHTML = data['new_val']['case_age__c'];
-            children[5].innerHTML = data['new_val']['entitlement_type__c'];
-            children[6].innerHTML = data['new_val']['first_response_complete__c']
-            children[7].innerHTML = data['new_val']['preferred_case_language__c']
-            children[8].innerHTML = data['new_val']['case_preferred_timezone__c']
-            children[9].innerHTML = data['new_val']['product__c']
-            children[10].innerHTML = data['new_val']['category__c']
-            children[11].innerHTML = data['new_val']['subject']
-            children[12].innerHTML = data['new_val']['name']
-
-          } else {
-            // console.log("I am NOT here!!");
-            row = document.createElement("tr");
-            row.setAttribute("id", data['new_val']['id']);
-            cellEngineer = document.createElement("td");
-            cellCaseNumber = document.createElement("td");
-            cellEscalation = document.createElement("td");
-            cellPriority = document.createElement("td");
-            cellAge = document.createElement("td");
-            cellEntitle = document.createElement("td");
-            cellFR = document.createElement("td");
-            cellLanguage = document.createElement("td");
-            cellTimezone = document.createElement("td");
-            cellProduct = document.createElement("td");
-            cellCategory = document.createElement("td");
-            cellSubject = document.createElement("td");
-            cellName = document.createElement("td");
-
-            cellEngineer.innerHTML = data['new_val']['case_owner_name__c'];
-            cellCaseNumber.innerHTML = data['new_val']['casenumber'];
-            cellEscalation.innerHTML = data['new_val']['isescalated'];
-            cellPriority.innerHTML = data['new_val']['priority'];
-            cellAge.innerHTML = data['new_val']['case_age__c'];
-            cellEntitle.innerHTML = data['new_val']['entitlement_type__c'];
-            cellFR.innerHTML = data['new_val']['first_response_complete__c']
-            cellLanguage.innerHTML = data['new_val']['preferred_case_language__c']
-            cellTimezone.innerHTML = data['new_val']['case_preferred_timezone__c']
-            cellProduct.innerHTML = data['new_val']['product__c']
-            cellCategory.innerHTML = data['new_val']['category__c']
-            cellSubject.innerHTML = data['new_val']['subject']
-            cellName.innerHTML = data['new_val']['name']
-
-            table.appendChild(row);
-            row.appendChild(cellEngineer);
-            row.appendChild(cellCaseNumber);
-            row.appendChild(cellEscalation);
-            row.appendChild(cellPriority);
-            row.appendChild(cellAge);
-            row.appendChild(cellEntitle);
-            row.appendChild(cellFR);
-            row.appendChild(cellLanguage);
-            row.appendChild(cellTimezone);
-            row.appendChild(cellProduct);
-            row.appendChild(cellCategory);
-            row.appendChild(cellSubject);
-            row.appendChild(cellName);
-          }
-        };
-        */
-        /*
-        var table = $('#mydatatable').DataTable({
-          "data": data['new_val'],
-          "bDestroy": true
-        });
-        */
-        
-      });
-    </script>
-  </head>
-  <body class="bg-info">
-    
-    <h3>Change List</h3>
-    <div id="clock"></div>
-    <div id="message_box">
-      <p id="messages"></p>
-    </div>
-
-    <div>
-      <!-- <iframe src="http://angel:8080/#tables/6c198bd1-d495-4d42-885b-4ea2f66ea004" height="350" width="1000" frameborder="0"></iframe> -->
-    </div>
-    <!-- 
-    <div class="container">
-      <div class="jumbotron"></div>
-    </div>
-    -->
-    <h1><%= title %></h1>
-    <div>
-      <table id="mydatatable">
-
-      </table>
-    </div>
-    <div class="container">
-        <div class="ZipDatatable">
-            <table id="ZipcodesTable" class="table table-bordered table-sm">
-                <tr>
-                  <th>Engineer</th>
-                    <th>Case #</th>
-                    <th>Esclt</th>
-                    <th>Priority</th>
-                    <th>Age</th>
-                    <th>Entitlement</th>
-                    <th>FR</th>
-                    <th>Language</th>
-                    <th>TimeZone</th>
-                    <th>Product</th>
-                    <th>Category</th>
-                    <th>Subject</th>
-                    <th>Account</th>
-                </tr>
-                </thead>
-                <tbody>
-                <% 
-                  
-                %> 
-                <tr>
-                    <td></td>
-                </tr>
-                </tbody>
-            </table>
+        <h3>Change List</h3>
+        <p id="clock"></p>
+        <div id="message_box">
+            <p id="messages"></p>
         </div>
-    </div>
-  </body>
-  
-  <script>
-    console.log("test");
-    console.log('<%= title %>');
 
-    var dataSet = <%- JSON.stringify(userData) %>;
-    
-    // $(document).ready(function () {
-      var dt = $('#ZipcodesTable').DataTable({
-      "paging": true,
-      "pageLength": 100,
-      "data": dataSet,
-      columns : [
-        { title: "Engineers", data: "case_owner_name__c" },
-        { title: "Case #", data: "casenumber" },
-        { title: "Esclt", data: "isescalated" },
-        { title: "Pri", data: "priority" },
-        { title: "Age", data: "case_age__c" },
-        { title: "Entitlement", data: "entitlement_type__c" },
-        { title: "FR", data: "first_response_complete__c" },
-        { title: "Language", data: "preferred_case_language__c" },
-        { title: "TimeZone", data: "case_preferred_timezone__c" },
-        { title: "Product", data: "product__c" },
-        { title: "Category", data: "category__c" },
-        { title: "Subject", data: "subject" },
-        { title: "Account", data: "name", "defaultContent": "" }
-      ]
-      });
-      // dt.draw();
-    // });
-  </script>
+        <h1><%= title %></h1>
+            <div>
+                <table id="CaseTable" class="table table-bordered table-sm"></table>
+            </div>
+        
+            <script>
+                var dataSet = <%- JSON.stringify(caseTable) %>;
+        
+                // $(document).ready(function () {
+                var dt = $('#CaseTable').DataTable({
+                    "paging": true,
+                    "pageLength": 100,
+                    "data": dataSet,
+                    columns : [
+                        { title: "Engineers", data: "case_owner_name__c" },
+                        { title: "Case #", data: "casenumber" },
+                        { title: "Esclt", data: "isescalated" },
+                        { title: "Pri", data: "priority" },
+                        { title: "Age", data: "case_age__c" },
+                        { title: "Entitlement", data: "entitlement_type__c" },
+                        { title: "FR", data: "first_response_complete__c" },
+                        { title: "Language", data: "preferred_case_language__c" },
+                        { title: "TimeZone", data: "case_preferred_timezone__c" },
+                        { title: "Product", data: "product__c" },
+                        { title: "Category", data: "category__c" },
+                        { title: "Subject", data: "subject" },
+                        { title: "Account", data: "name", "defaultContent": "" }
+                    ]
+                    });
+                    // dt.draw();
+                // });
+            </script>
+    </body>
 </html>
 
 

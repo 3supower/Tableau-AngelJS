@@ -14,13 +14,7 @@ var casesRouter = require('./routes/cases');
 var app = express();
 
 // Create the http server 
-const server = require('http').createServer(app);
-  
-// Create the Socket IO server on  
-// the top of http server 
-// 서버 소켓 - 소켓 이름은 io (클라이언트 소켓 하고 헷깔리지 말것)
-// on: input from client
-// emit: output to client
+const server = require('http').createServer(app); 
 const io = socketio(server);
 
 app.use(function(req, res, next) {
@@ -28,11 +22,16 @@ app.use(function(req, res, next) {
   next();
 });
 
-// This is Server Socket!
+// Server Socket
 io.on("connection", function(socket){
-  // Server console.log is output to terminal window.
-  console.log("A User CONNECTted");
-  // socket.emit('news', { hello: 'world' });
+    var clientIP = socket.request.connection.remoteAddress;
+    console.log("A User CONNECTted from "+clientIP);
+
+  // emit to client
+  socket.emit('socketToMe', 'from app.js');
+  socket.emit('news', { hello: 'world' });
+  socket.emit('datetime', new Date().getTime());
+
   // socket.username = 'jchoiii';
   socket.on('change_username', (data) => {
     socket.username = data.username;
@@ -42,10 +41,6 @@ io.on("connection", function(socket){
     console.log('new message:' + msg);
     io.emit('chat message', msg);
   });
-  
-  io.emit('socketToMe', 'from app.js'); // Server to Client directly pass data
-  
-  socket.emit('datetime', new Date().getTime() );
 });
 
 // view engine setup
