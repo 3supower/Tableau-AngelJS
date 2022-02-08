@@ -54,11 +54,14 @@
         </div>
 
         <h1><%= title %></h1>
+        <p><a href="javascript:void(0);" onclick="fnClickAddRow();">Click to add a new row</a></p>
             <div>
                 <table id="CaseTable" class="table table-bordered table-sm"></table>
             </div>
         
             <script>
+                // https://datatables.net/beta/1.8/examples/api/add_row.html
+                var giCount = 1;
                 var dataSet = <%- JSON.stringify(caseTable) %>;
         
                 // $(document).ready(function () {
@@ -84,6 +87,16 @@
                     });
                     // dt.draw();
                 // });
+
+                function fnClickAddRow() {
+                    $('#CaseTable').DataTable().fnAddData( [
+                        giCount+".1",
+                        giCount+".2",
+                        giCount+".3",
+                        giCount+".4" ] );
+                    
+                    giCount++;
+                }
             </script>
     </body>
 </html>

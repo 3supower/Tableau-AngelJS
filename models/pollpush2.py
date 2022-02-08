@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from cgi import test
 import subprocess
 import json
 import re
@@ -10,10 +11,11 @@ import logging
 import pandas as pd
 from rethinkdb import RethinkDB
 
-logging.basicConfig(filename='catchpy.log', level=logging.DEBUG)
+# logging.basicConfig(filename='catchpy.log', level=logging.DEBUG)
 
 r = RethinkDB()
 conn = r.connect(host='angel.tsi.lan', db='MyDB')
+# conn = r.connect(host='3ef0c5d6ba19477.tsi.lan', db='DevilCASE')
 
 query = '''
 SELECT 
@@ -74,8 +76,8 @@ while True:
 
         df = pd.DataFrame(new_dict)
         exploded = df.Account.apply(json.dumps).apply(json.loads).apply(pd.Series).drop(columns='attributes')
-
-        df_filtered = df[[
+        
+        df_filtered = df.loc[df["Case_Owner_Name__c"].isnull() | (df["Case_Owner_Name__c"].notnull() & df["Histories"].notnull()),[
             "CaseNumber",
             "Case_Age__c", 
             "Status", 
@@ -88,7 +90,8 @@ while True:
             "IsEscalated",
             "Preferred_Case_Language__c",
             "Case_Preferred_Timezone__c",
-            "Subject"
+            "Subject",
+            "Histories"
         ]]
         
         new_df = pd.concat([df_filtered, exploded], axis=1)
