@@ -22,6 +22,7 @@ router.get('/', function(req, res, next) {
             return cursor.toArray();
         }).then(function(results){            
             res.render('cases', {title: 'Case List', caseTable: results});
+            // res.io.emit('alldata', results);
         });
     });
 

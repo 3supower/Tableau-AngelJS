@@ -1,3 +1,5 @@
+
+
 body {
     padding: 50px;
     font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
@@ -7,6 +9,7 @@ a {
     color: #00B7FF;
 }
 
+
 #message_box {
     display: block;
     height: 100 px;
@@ -14,6 +17,15 @@ a {
     /* overflow: scroll; */
     border-style: solid;
     border-color: darkgreen;
+}
+
+#new_message_box {
+    display: block;
+    height: 100 px;
+    background-color: pink;
+    /* overflow: scroll; */
+    border-style: solid;
+    border-color: red;
 }
 
 #messages {

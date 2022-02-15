@@ -75,9 +75,9 @@ while True:
         print('Records Size: ' + str(len(new_dict)))
 
         df = pd.DataFrame(new_dict)
-        exploded = df.Account.apply(json.dumps).apply(json.loads).apply(pd.Series).drop(columns='attributes')
-        
+                
         df_filtered = df.loc[df["Case_Owner_Name__c"].isnull() | (df["Case_Owner_Name__c"].notnull() & df["Histories"].notnull()),[
+            "Id",
             "CaseNumber",
             "Case_Age__c", 
             "Status", 
@@ -91,12 +91,15 @@ while True:
             "Preferred_Case_Language__c",
             "Case_Preferred_Timezone__c",
             "Subject",
-            "Histories"
+            "Histories",
+            "Account"
         ]]
+
+        exploded = df_filtered.Account.apply(json.dumps).apply(json.loads).apply(pd.Series).drop(columns='attributes')
         
         new_df = pd.concat([df_filtered, exploded], axis=1)
         new_df.columns = new_df.columns.str.lower()
-        new_df["id"] = new_df['casenumber']
+        # new_df["id"] = new_df['casenumber']
         # print(new_df.columns)
 
         # SAMPLE DATAFRAME
@@ -121,9 +124,7 @@ while True:
             cast_column_names_lower=True
             )
 
-            # Detect new cases - Adding new rows in the existing table
-            print("==========================================================================================")
-            print("New cases - To add in the table")
+            # Detect new cases - Adding new rows into the existing table
             if compare.df1_unq_rows.empty:
                 print("No new case!!")
                 logging.warning("no new case")
@@ -131,6 +132,9 @@ while True:
                 logging.error('Yes! We got a new CASE!')
                 print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!ADD ROWS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 print(compare.df1_unq_rows)
+                new_case = compare.df1_unq_rows.fillna('').to_dict(orient="records")
+                print(new_case)
+                r.table("table1").insert(new_case).run(conn)
                 print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!ADD ROWS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             
             
@@ -142,6 +146,8 @@ while True:
             else:
                 print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@REMOVE ROWS@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
                 print(compare.df2_unq_rows)
+                old_case = compare.df2_unq_rows.fillna('').to_dict(orient="records")
+                print(old_case)
                 print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@REMOVE ROWS@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
             print("==========================================================================================")
             
@@ -165,11 +171,14 @@ while True:
                     print("New record in DB")
                     print(r.table('table1').get(dictRow['id']).run(conn))
 
-
         ## RethinkDB
         # When the program is firstly loaded
         # new_df = new_df.fillna('')
         conversion = new_df.fillna('').to_dict(orient='records')
+
+        # print(conversion)
+
+
         if initial_loading:
             r.table('table1').delete().run(conn)
             r.table('table1').insert(conversion).run(conn)

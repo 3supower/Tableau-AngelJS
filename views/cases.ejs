@@ -3,100 +3,359 @@
     <head>
         <title><%= title %></title>
         <link rel='stylesheet' href='/stylesheets/style.css' />
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+        <!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css"> -->
+        <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css"> -->
+        <!-- <link rel="stylesheet" href="https://cdn.datatables.net/1.11.4/css/dataTables.bootstrap5.min.css"> -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
-        <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+        <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+        <!-- <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script> -->
+        <!-- <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script> -->
         <script src="/socket.io/socket.io.js"></script>
-        
-        
-        <script>
-            var socket = io();
-
-            socket.on('socketToMe', (data) => {
-                console.log(data);
-            });
-
-            socket.on('news', (data) => {
-                console.log(data);
-            });
-
-            socket.on('router_emit1', (data) => {
-                console.log(data);
-            });
-
-            socket.on('datetime', function (data) {
-                console.log(data);
-                $("#clock").text(new Date(data));
-            });
-            
-            socket.on('newchange', function (data) {
-                var messages = document.querySelector('#messages');
-                var new_data = JSON.stringify(data, null, 3);
-                var message = '<b>' + new_data + '</b>';
-                messages.innerHTML = message;
-            });
-
-            socket.on('router_emit2', (data) => {
-                console.log(data)
-            });
-        </script>
     </head>
 
     <body class="bg-info">
-
-        
-
-        <h3>Change List</h3>
+        <h1><%= title %></h1>
         <p id="clock"></p>
-        <div id="message_box">
-            <p id="messages"></p>
+        <!-- <p><a href="javascript:void(0);" onclick="fnClickAddRow();">Click to add a new row</a></p> -->
+
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">All</button>
+            </li>
+            <li class="nav-item" role="presentation">
+            <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Premium</button>
+            </li>
+            <li class="nav-item" role="presentation">
+            <button class="nav-link" id="messages-tab" data-bs-toggle="tab" data-bs-target="#messages" type="button" role="tab" aria-controls="messages" aria-selected="false">Server</button>
+            </li>
+            <li class="nav-item" role="presentation">
+            <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="false">Desktop</button>
+            </li>
+        </ul>
+        
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div class="tab-pane active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                <table id="CaseTable" class="cell-border hover display compact"></table>
+            </div>
+            <div class="tab-pane" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                <table id="PriTable" class="cell-border hover display compact"></table>
+            </div>
+            <div class="tab-pane" id="messages" role="tabpanel" aria-labelledby="messages-tab">
+                <table id="ServerTable" class="cell-border hover display compact"></table>
+            </div>
+            <div class="tab-pane" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+                <table id="DesktopTable" class="cell-border hover display compact"></table>
+            </div>
         </div>
 
-        <h1><%= title %></h1>
-        <p><a href="javascript:void(0);" onclick="fnClickAddRow();">Click to add a new row</a></p>
+        <!--
             <div>
-                <table id="CaseTable" class="table table-bordered table-sm"></table>
+                <table id="CaseTable" class="cell-border hover display compact"></table>
             </div>
-        
+        -->
             <script>
-                // https://datatables.net/beta/1.8/examples/api/add_row.html
-                var giCount = 1;
+                var socket = io();
+
                 var dataSet = <%- JSON.stringify(caseTable) %>;
         
-                // $(document).ready(function () {
-                var dt = $('#CaseTable').DataTable({
-                    "paging": true,
-                    "pageLength": 100,
-                    "data": dataSet,
-                    columns : [
-                        { title: "Engineers", data: "case_owner_name__c" },
-                        { title: "Case #", data: "casenumber" },
-                        { title: "Esclt", data: "isescalated" },
-                        { title: "Pri", data: "priority" },
-                        { title: "Age", data: "case_age__c" },
-                        { title: "Entitlement", data: "entitlement_type__c" },
-                        { title: "FR", data: "first_response_complete__c" },
-                        { title: "Language", data: "preferred_case_language__c" },
-                        { title: "TimeZone", data: "case_preferred_timezone__c" },
-                        { title: "Product", data: "product__c" },
-                        { title: "Category", data: "category__c" },
-                        { title: "Subject", data: "subject" },
-                        { title: "Account", data: "name", "defaultContent": "" }
-                    ]
+                $(document).ready(function () {
+                    var dt = $('#CaseTable').DataTable({
+                        "paging": true,
+                        "pageLength": 100,
+                        fixedHeader : {
+                            header: true
+                        },
+                        "autoWidth": false,
+                        "data": dataSet,
+                        columns : [
+                            {data: "id", visible:false},
+                            { title: "Engineers", data: "case_owner_name__c" },
+                            { title: "Case #", data: "casenumber", "render": function(data, type, row, meta){
+                                if(type === 'display'){
+                                    data = '<a href="https://tableau.my.salesforce.com/' + row.id + '"target="_blank">' + data + '</a>';
+                                }
+                                return data;
+                            } },
+                            { title: "Esclt", data: "isescalated" },
+                            { title: "Pri", data: "priority" },
+                            { title: "Age", data: "case_age__c" },
+                            { title: "Entitlement", data: "entitlement_type__c" },
+                            { title: "FR", data: "first_response_complete__c" },
+                            { title: "Language", data: "preferred_case_language__c" },
+                            { title: "TimeZone", data: "case_preferred_timezone__c" },
+                            { title: "Product", data: "product__c" },
+                            { title: "Category", data: "category__c" },
+                            { title: "Subject", data: "subject" },
+                            { title: "Account", data: "name", "defaultContent": "" }
+                        ],
+                        "rowCallback": function(row, data, index){
+                            if (data.entitlement_type__c == "Premium") {
+                                $('td:eq(5)',row).css('background-color', 'Red')
+                            }
+                        },
+                        "order": [[1, 'asc'], [6, 'asc'],[4,'asc'],[5,'desc']],
+                        "preDrawCallback": function (settings){
+                            pageScrollPos = $('.dataTables.scrollBody').scrollTop();
+                        },
+                        "drawCallback": function (settings) {
+                            $('.dataTables_scrollBody').scrollTop(pageScrollPos);
+                        }
                     });
-                    // dt.draw();
-                // });
+
+                    var dt_pri = $('#PriTable').DataTable({
+                        "paging": true,
+                        "pageLength": 100,
+                        fixedHeader : {
+                            header: true
+                        },
+                        "autoWidth": true,
+                        "data": dataSet,
+                        columns : [
+                            {data: "id", visible:false},
+                            { title: "Engineers", data: "case_owner_name__c" },
+                            { title: "Case #", data: "casenumber", "render": function(data, type, row, meta){
+                                if(type === 'display'){
+                                    data = '<a href="https://tableau.my.salesforce.com/' + row.id + '"target="_blank">' + data + '</a>';
+                                }
+                                return data;
+                            } },
+                            { title: "Esclt", data: "isescalated" },
+                            { title: "Pri", data: "priority" },
+                            { title: "Age", data: "case_age__c" },
+                            { title: "Entitlement", data: "entitlement_type__c" },
+                            { title: "FR", data: "first_response_complete__c" },
+                            { title: "Language", data: "preferred_case_language__c" },
+                            { title: "TimeZone", data: "case_preferred_timezone__c" },
+                            { title: "Product", data: "product__c" },
+                            { title: "Category", data: "category__c" },
+                            { title: "Subject", data: "subject" },
+                            { title: "Account", data: "name", "defaultContent": "" }
+                        ],
+                        "rowCallback": function(row, data, index){
+                            if (data.entitlement_type__c == "Premium") {
+                                $('td:eq(5)',row).css('background-color', 'pink')
+                            }
+                        },
+                        "order": [[1, 'asc'], [6, 'asc'],[4,'asc'],[5,'desc']],
+                        "preDrawCallback": function (settings){
+                            pageScrollPos = $('.dataTables.scrollBody').scrollTop();
+                        },
+                        "drawCallback": function (settings) {
+                            $('.dataTables_scrollBody').scrollTop(pageScrollPos);
+                        }
+                    });
+
+                    var dt_server = $('#ServerTable').DataTable({
+                        "paging": true,
+                        "pageLength": 100,
+                        "data": dataSet,
+                        columns : [
+                            {data: "id", visible:false},
+                            { title: "Engineers", data: "case_owner_name__c" },
+                            { title: "Case #", data: "casenumber", "render": function(data, type, row, meta){
+                                if(type === 'display'){
+                                    data = '<a href="https://tableau.my.salesforce.com/' + row.id + '"target="_blank">' + data + '</a>';
+                                }
+                                return data;
+                            } },
+                            { title: "Esclt", data: "isescalated" },
+                            { title: "Pri", data: "priority" },
+                            { title: "Age", data: "case_age__c" },
+                            { title: "Entitlement", data: "entitlement_type__c" },
+                            { title: "FR", data: "first_response_complete__c" },
+                            { title: "Language", data: "preferred_case_language__c" },
+                            { title: "TimeZone", data: "case_preferred_timezone__c" },
+                            { title: "Product", data: "product__c" },
+                            { title: "Category", data: "category__c" },
+                            { title: "Subject", data: "subject" },
+                            { title: "Account", data: "name", "defaultContent": "" }
+                        ],
+                        "rowCallback": function(row, data, index){
+                            if (data.entitlement_type__c == "Premium") {
+                                $('td:eq(5)',row).css('background-color', 'Red')
+                            }
+                        },
+                        "order": [[1, 'asc'], [6, 'asc'],[4,'asc'],[5,'desc']],
+                        "preDrawCallback": function (settings){
+                            pageScrollPos = $('.dataTables.scrollBody').scrollTop();
+                        },
+                        "drawCallback": function (settings) {
+                            $('.dataTables_scrollBody').scrollTop(pageScrollPos);
+                        }
+                    });
+
+                    var dt_desktop = $('#DesktopTable').DataTable({
+                        "paging": true,
+                        "pageLength": 100,
+                        fixedHeader : {
+                            header: true
+                        },
+                        "autoWidth": false,
+                        "data": dataSet,
+                        columns : [
+                            {data: "id", visible:false},
+                            { title: "Engineers", data: "case_owner_name__c" },
+                            { title: "Case #", data: "casenumber", "render": function(data, type, row, meta){
+                                if(type === 'display'){
+                                    data = '<a href="https://tableau.my.salesforce.com/' + row.id + '"target="_blank">' + data + '</a>';
+                                }
+                                return data;
+                            } },
+                            { title: "Esclt", data: "isescalated" },
+                            { title: "Pri", data: "priority" },
+                            { title: "Age", data: "case_age__c" },
+                            { title: "Entitlement", data: "entitlement_type__c" },
+                            { title: "FR", data: "first_response_complete__c" },
+                            { title: "Language", data: "preferred_case_language__c" },
+                            { title: "TimeZone", data: "case_preferred_timezone__c" },
+                            { title: "Product", data: "product__c" },
+                            { title: "Category", data: "category__c" },
+                            { title: "Subject", data: "subject" },
+                            { title: "Account", data: "name", "defaultContent": "" }
+                        ],
+                        "rowCallback": function(row, data, index){
+                            if (data.entitlement_type__c == "Premium") {
+                                $('td:eq(5)',row).css('background-color', 'Red')
+                            }
+                        },
+                        "order": [[1, 'asc'], [6, 'asc'],[4,'asc'],[5,'desc']],
+                        "preDrawCallback": function (settings){
+                            pageScrollPos = $('.dataTables.scrollBody').scrollTop();
+                        },
+                        "drawCallback": function (settings) {
+                            $('.dataTables_scrollBody').scrollTop(pageScrollPos);
+                        }
+                    });
+
+
+
+
+                    socket.on('newchange', function (changed_data) {    
+                        
+                        var rowIndex = null;
+                        dt.rows(function (idx, data, node){
+                            if(data.casenumber == changed_data["new_val"]["casenumber"]) {
+                                rowIndex = idx;
+                            }
+                            return false;
+                        });
+                        
+                        if (rowIndex != null) {
+                            console.log("The case " + changed_data["new_val"]["casenumber"] + " is at "+rowIndex);
+                            // updateNode
+                            var updatedNode = dt.row(rowIndex).data({
+                                "id": changed_data["new_val"]["id"], 
+                                "case_owner_name__c": changed_data["new_val"]["case_owner_name__c"], 
+                                "casenumber": changed_data["new_val"]["casenumber"], 
+                                "isescalated": changed_data["new_val"]["isescalated"],
+                                "priority": changed_data["new_val"]["priority"],
+                                "case_age__c": changed_data["new_val"]["case_age__c"],
+                                "entitlement_type__c": changed_data["new_val"]["entitlement_type__c"],
+                                "first_response_complete__c": changed_data["new_val"]["first_response_complete__c"],
+                                "preferred_case_language__c": changed_data["new_val"]["preferred_case_language__c"],
+                                "case_preferred_timezone__c": changed_data["new_val"]["case_preferred_timezone__c"],
+                                "product__c": changed_data["new_val"]["product__c"],
+                                "category__c": changed_data["new_val"]["category__c"],
+                                "subject": changed_data["new_val"]["subject"],
+                                "name": changed_data["new_val"]["name"]
+                            }).draw(false).node();
+                            $(updatedNode).css({backgroundColor: 'yellow'}).animate({backgroundColor: 'white'}, 2500);
+                        } else {
+                            // addNode
+                            console.log("The NEW case " + changed_data["new_val"]["casenumber"] + " is added!!!");
+                            addRow()
+                        }
+                        
+                        function addRow() {
+                            var rowNode = dt.row.add({
+                                "id": changed_data["new_val"]["id"], 
+                                "case_owner_name__c": changed_data["new_val"]["case_owner_name__c"], 
+                                "casenumber": changed_data["new_val"]["casenumber"], 
+                                "isescalated": changed_data["new_val"]["isescalated"],
+                                "priority": changed_data["new_val"]["priority"],
+                                "case_age__c": changed_data["new_val"]["case_age__c"],
+                                "entitlement_type__c": changed_data["new_val"]["entitlement_type__c"],
+                                "first_response_complete__c": changed_data["new_val"]["first_response_complete__c"],
+                                "preferred_case_language__c": changed_data["new_val"]["preferred_case_language__c"],
+                                "case_preferred_timezone__c": changed_data["new_val"]["case_preferred_timezone__c"],
+                                "product__c": changed_data["new_val"]["product__c"],
+                                "category__c": changed_data["new_val"]["category__c"],
+                                "subject": changed_data["new_val"]["subject"],
+                                "name": changed_data["new_val"]["name"]
+                            }).draw(false).node(); // Use draw(false) to stay on the same page after the data update.
+                            $(rowNode).css({backgroundColor: 'green'}).animate({backgroundColor: 'white'}, 2500); //animate not working
+                        }
+    
+                        
+                    });                    
+                });
+
+                // Not used
+                function reloadDataTable(dataSet) {
+                    dt.clear();
+                    dt.rows.add(dataSet);
+                    dt.draw(false);
+                }
 
                 function fnClickAddRow() {
-                    $('#CaseTable').DataTable().fnAddData( [
-                        giCount+".1",
-                        giCount+".2",
-                        giCount+".3",
-                        giCount+".4" ] );
-                    
-                    giCount++;
+                    var rowNode = dt.row.add({
+                        "id": "hahahahah",
+                        "case_owner_name__c": "haha", 
+                        "casenumber": "01234567", 
+                        "isescalated": false,
+                        "priority": "P1",
+                        "case_age__c": 123,
+                        "entitlement_type__c": "Standard",
+                        "first_response_complete__c": true,
+                        "preferred_case_language__c": "Korean",
+                        "case_preferred_timezone__c": "AU",
+                        "product__c": "Server",
+                        "category__c": "None",
+                        "subject": "very hard question",
+                        "name": "samsung"
+                    }).draw(false).node(); // Use draw(false) to stay on the same page after the data update.
+
+                    $(rowNode).css({backgroundColor: 'green'}).animate({backgroundColor: 'white'}, 2500); //animate not working
                 }
+
+                function updateCase() {
+                    //
+                }
+
+                function updateRow() {
+                    var rowNum = randomRow();
+                    var row = dt1.row(randomRow());
+                    // update the second cell i.e. no. 1
+                    // draw() only matters if sorting
+                    // by the updated column
+                    var cellNode = dt1.cell(rowNum, 1)
+                        .data(timestamp)
+                        .draw(false)
+                        .node();
+                    $(cellNode)
+                        .css({backgroundColor: 'blue'})
+                        .animate({backgroundColor: 'white'}, 2500);
+                }
+                
+                function deleteRow() {
+                    var row = dt1.row(randomRow());
+                    var rowNode = row.node();
+                    $(rowNode)
+                        .css({backgroundColor: 'red'})
+                        .animate({backgroundColor: 'black'}, 2500,
+                            function() {row.remove().draw(false)});
+                }
+
+                socket.on('alldata', (data) => {
+                    console.log(data);
+                });
+
+                
             </script>
     </body>
 </html>
